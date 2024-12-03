@@ -16,6 +16,7 @@ class Assignment < ApplicationRecord
   attr_accessor :title, :description, :has_badge, :enable_pair_programming, :is_calibrated, :staggered_deadline
 
   def review_questionnaire_id
+    ExpertizaLogger.info LoggerMessage.new("Assignment Model", session[:user].name, "User #{session[:user].name} searched for questionnaire for assignment #{id}.")
     Questionnaire.find_by_assignment_id id
   end
 
@@ -38,11 +39,13 @@ class Assignment < ApplicationRecord
     user = User.find_by(id: user_id)
     # Check if the user exists
     if user.nil?
+      ExpertizaLogger.warn LoggerMessage.new("Assignment Model", session[:user].name, "User #{user_id} does not exist. Not added to assignment #{id}.")
       raise "The user account does not exist"
     end
     # Check if the user is already a participant in the assignment
     participant = Participant.find_by(assignment_id:id, user_id:user.id)
     if participant
+      ExpertizaLogger.warn LoggerMessage.new("Assignment Model", user.id, "User #{user.id} already a participant on assignment #{id}.")
       # Raises error if the user is already a participant
       raise "The user #{user.name} is already a participant."
     end
@@ -51,6 +54,7 @@ class Assignment < ApplicationRecord
                                             user_id: user.id)
     # Set the participant's handle
     new_part.set_handle
+    ExpertizaLogger.info LoggerMessage.new("Assignment Model", user.id, "User #{user.id} added to assignment #{id}.")
     # Return the newly created AssignmentParticipant
     new_part
   end
@@ -65,6 +69,7 @@ class Assignment < ApplicationRecord
     assignment_participant = AssignmentParticipant.where(assignment_id: self.id, user_id: user_id).first
     # Delete the AssignmentParticipant record
     if assignment_participant
+      ExpertizaLogger.info LoggerMessage.new("Assignment Model", session[:user].name, "User #{session[:user].name} removed user #{user_id} from assignment #{id}.")
       assignment_participant.destroy
     end
   end
@@ -74,6 +79,7 @@ class Assignment < ApplicationRecord
   # Returns the modified assignment object with course_id set to nil.
   def remove_assignment_from_course
     # Set the course_id of the assignment to nil
+    ExpertizaLogger.info LoggerMessage.new("Assignment Model", session[:user].name, "User #{session[:user].name} removed assignment #{id} from course #{self.course_id}.")
     self.course_id = nil
     # Return the modified assignment
     self
@@ -89,11 +95,13 @@ class Assignment < ApplicationRecord
     assignment = Assignment.where(id: id).first
     # Check if the assignment already belongs to the provided course_id
     if assignment.course_id == course_id
+      ExpertizaLogger.warn LoggerMessage.new("Assignment Model", session[:user].name, "Assignment #{id} already added to course #{course_id}.")
       # Raises error if the assignment already belongs to the provided course_id
       raise "The assignment already belongs to this course id."
     end
     # Update the assignment's course assignment
     assignment.course_id = course_id
+    ExpertizaLogger.info LoggerMessage.new("Assignment Model", session[:user].name, "User #{session[:user].name} added assignment #{id} to course #{course_id}.")
     # Return the modified assignment
     assignment
   end
@@ -113,7 +121,7 @@ class Assignment < ApplicationRecord
 
     # Save the copied assignment to the database
     copied_assignment.save
-
+    ExpertizaLogger.info LoggerMessage.new("Assignment Model", session[:user].name, "User #{session[:user].name} copied assignment #{id}.")
     copied_assignment
 
   end

@@ -10,6 +10,8 @@ class Invitation < ApplicationRecord
   # Return a new invitation
   # params = :assignment_id, :to_id, :from_id, :reply_status
   def self.invitation_factory(params)
+    ExpertizaLogger.info LoggerMessage.new("Invitation Model", session[:user].name,
+                 "User #{session[:user].name} created new invitation for assignment #{params[:assignment_id]}.")
     Invitation.new(params)
   end
 
@@ -26,6 +28,8 @@ class Invitation < ApplicationRecord
 
   # send invite email
   def send_invite_email
+    ExpertizaLogger.info LoggerMessage.new("Invitation Model", session[:user].name,
+                                           "Email invitation for assignment #{assignment_id} sent.")
     InvitationSentMailer.with(invitation: self)
                         .send_invitation_email
                         .deliver_later
@@ -42,16 +46,22 @@ class Invitation < ApplicationRecord
   # Lastly the users team entry will be added to the TeamsUser table and their assigned topic is updated.
   # NOTE: For now this method simply updates the invitation's reply_status.
   def accept_invitation(_logged_in_user)
+    ExpertizaLogger.info LoggerMessage.new("Invitation Model", session[:user].name,
+                                           "User #{_logged_in_user} accepted invitation for assignment #{assignment_id}.")
     update(reply_status: InvitationValidator::ACCEPT_STATUS)
   end
 
   # This method handles all that needs to be done upon an user declining an invitation.
   def decline_invitation(_logged_in_user)
+    ExpertizaLogger.info LoggerMessage.new("Invitation Model", session[:user].name,
+                                           "User #{_logged_in_user} declined invitation for assignment #{assignment_id}.")
     update(reply_status: InvitationValidator::REJECT_STATUS)
   end
 
   # This method handles all that need to be done upon an invitation retraction.
   def retract_invitation(_logged_in_user)
+    ExpertizaLogger.info LoggerMessage.new("Invitation Model", session[:user].name,
+                                           "User #{_logged_in_user} destroyed invitation for assignment #{assignment_id}.")
     destroy
   end
 

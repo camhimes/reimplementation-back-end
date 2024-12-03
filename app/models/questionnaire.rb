@@ -22,6 +22,8 @@ class Questionnaire < ApplicationRecord
       new_question.questionnaire_id = questionnaire.id
       new_question.save!
     end
+    ExpertizaLogger.info LoggerMessage.new("Questionnaire Model", session[:user].name,
+                                           "User #{session[:user]} copied details for questionnaire #{params[:id]}.")
     questionnaire
   end
 

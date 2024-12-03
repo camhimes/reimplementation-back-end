@@ -20,7 +20,7 @@ class AccountRequest < ApplicationRecord
   # Check if user with same username or email already exists in Users table
   def validate_user_exists
     return unless User.find_by(name: self[:username])
-
+    ExpertizaLogger.warn LoggerMessage.new('Account Request Model', self[:username], "User with name #{self[:username]} already exists.")
     errors.add(:username, 'User with this username already exists')
   end
 end
