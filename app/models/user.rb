@@ -55,6 +55,7 @@ class User < ApplicationRecord
       short_name = login.split('@').first
       user_list = User.where(name: short_name)
       user = user_list.first if user_list.one?
+
     end
     user
   end
@@ -63,6 +64,9 @@ class User < ApplicationRecord
   def reset_password
     random_password = SecureRandom.alphanumeric(10)
     user.password_digest = BCrypt::Password.create(random_password)
+    ExpertizaLogger.info LoggerMessage.new("User Model", session[:user].name,
+                                           "User #{id}'s password was reset.",)
+
     user.save
   end
 

@@ -13,6 +13,8 @@ class StudentTask
 
     # create a new StudentTask instance from a Participant object.cccccccc
     def self.create_from_participant(participant)
+      ExpertizaLogger.info LoggerMessage.new("Student Task Model", session[:user].name,
+                                             "New student task created from information for participant #{participant.fullname}")
       new(
         assignment: participant.assignment.name,                          # Name of the assignment associated with the student task
         topic: participant.topic,                                         # Current stage of the assignment process
@@ -26,6 +28,8 @@ class StudentTask
 
     # create an array of StudentTask instances for all participants linked to a user, sorted by deadline.
     def self.from_user(user)
+      ExpertizaLogger.info LoggerMessage.new("Student Task Model", session[:user].name,
+                                             "List of tasks retrieved for User #{user.id}",)
       Participant.where(user_id: user.id)
                  .map { |participant| StudentTask.create_from_participant(participant) }
                  .sort_by(&:stage_deadline)

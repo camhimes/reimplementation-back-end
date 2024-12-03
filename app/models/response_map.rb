@@ -8,7 +8,10 @@ class ResponseMap < ApplicationRecord
 
   # returns the assignment related to the response map
   def response_assignment
-    return Participant.find(self.reviewer_id).assignment
+    assignment = Participant.find(self.reviewer_id).assignment
+    ExpertizaLogger.info LoggerMessage.new("Response Map Model", session[:user].name,
+                                           "Response to assignment #{assignment.id} for reviewer #{self.reviewer_id} retrieved.")
+    assignment
   end
 
   def self.assessments_for(team)
@@ -35,6 +38,8 @@ class ResponseMap < ApplicationRecord
         sort_to.clear
       end
       responses = responses.sort { |a, b| a.map.reviewer.fullname <=> b.map.reviewer.fullname }
+      ExpertizaLogger.info LoggerMessage.new("Response Map Model", session[:user].name,
+                                             "User #{session[:user].name} retrieved responses to team #{team.id}.")
     end
     responses
   end
